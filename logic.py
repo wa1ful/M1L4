@@ -1,4 +1,6 @@
 from random import randint
+import datetime
+from datetime import datetime, timedelta
 import requests
 
 class Pokemon:
@@ -13,6 +15,7 @@ class Pokemon:
         self.name = self.get_name()
         self.hp = self.get_hp()
         self.power = self.get_power()
+        self.last_feed_time = datetime.now()
 
         Pokemon.pokemons[pokemon_trainer] = self
 
@@ -63,6 +66,16 @@ class Pokemon:
         else:
             enemy.hp = 0
             return f"Победа @{self.pokemon_trainer} над @{enemy.pokemon_trainer}! "
+        
+    def feed(self, feed_interval = 20, hp_increase = 10 ):
+        current_time = datetime.current()  
+        delta_time = timedelta(hours=feed_interval)  
+        if (current_time - self.last_feed_time) > delta_time:
+            self.hp += hp_increase
+            self.last_feed_time = current_time
+            return f"Здоровье покемона увеличено. Текущее здоровье: {self.hp}"
+        else:
+            return f"Следующее время кормления покемона: {current_time-delta_time}"
 
     # Метод класса для получения информации
     def info(self):
@@ -78,6 +91,9 @@ class Wizard(Pokemon):
             rate = randint(1,5)
             if rate == 1:
                 return "Покемон-волшебник применил щит в сражении"
+            
+    def feed(self):
+        return super().feed(hp_increase=20)
 
 class Fighter(Pokemon):
     def attack(self, enemy):
@@ -85,3 +101,6 @@ class Fighter(Pokemon):
         self.power += super_power
         result = super().attack(enemy)
         return result + f"\nБоец применил супер-атаку силой:{super_power}"
+    
+    def feed(self):
+        return super().feed(hp_increase=20)
