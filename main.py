@@ -35,13 +35,16 @@ def attack_pok(message):
 
 @bot.message_handler(commands=['feed'])
 def feed(message):
-    username = message.from_user.username
-    if username in Pokemon.pokemons.keys():
-        pokemon = Pokemon.pokemons[username]
-        result = pokemon.feed()
-        bot.reply_to(message, result)
-    else:
-        bot.reply_to(message, "Сначала создай покемона командой /go")
+    if message.from_user.username in Pokemon.pokemons.keys():
+        if message.reply_to_message:
+            if message.reply_to_message.from_user.username in Pokemon.pokemons.keys():
+                pok = Pokemon.pokemons[message.from_user.username]
+                res = pok.feed()
+                bot.send_message(message.chat.id, res)
+            else:
+                bot.reply_to(message, "Сначала создай покемона командой /go")
+        else:
+            bot.reply_to(message, "Чтобы покормить, нужно ответить на сообщения того, кого хочешь покормить")
 
 @bot.message_handler(commands=['info'])
 def info(message):
@@ -50,16 +53,6 @@ def info(message):
         pokemon = Pokemon.pokemons[username]
         info_text = f"{pokemon.info()}\n\nУровень: {pokemon.level}\nОпыт: {pokemon.exp}/{pokemon.exp_to_next_level}\nСытость: {pokemon.hunger}%\nСчастье: {pokemon.happiness}%\nВес: {pokemon.weight:.1f}кг\nЕда: {pokemon.inventory.get('food', 0)}"
         bot.send_message(message.chat.id, info_text)
-    else:
-        bot.reply_to(message, "Сначала создай покемона командой /go")
-
-@bot.message_handler(commands=['achievements'])
-def achievements(message):
-    username = message.from_user.username
-    if username in Pokemon.pokemons.keys():
-        pokemon = Pokemon.pokemons[username]
-        achievements_text = pokemon.get_achievements()
-        bot.send_message(message.chat.id, achievements_text)
     else:
         bot.reply_to(message, "Сначала создай покемона командой /go")
 
